@@ -1,0 +1,211 @@
+{
+  "info": {
+    "_postman_id": "23237c2b-8295-4eae-8839-891b29050a90",
+    "name": "ReqRes API Test Suite",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "GET users list (page 2)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response has correct page number\", function () {\r",
+              "    const jsonData = pm.response.json();\r",
+              "    pm.expect(jsonData.page).to.eql(2);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Data array is not empty\", function () {\r",
+              "    const jsonData = pm.response.json();\r",
+              "    pm.expect(jsonData.data.length).to.be.above(0);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"First user has expected fields\", function () {\r",
+              "    const jsonData = pm.response.json();\r",
+              "    pm.expect(jsonData.data[0]).to.have.property(\"email\");\r",
+              "    pm.expect(jsonData.data[0]).to.have.property(\"first_name\");\r",
+              "    pm.expect(jsonData.data[0]).to.have.property(\"avatar\");\r",
+              "    pm.expect(jsonData.data[0]).to.have.property(\"id\");\r",
+              "});\r",
+              "\r",
+              "// Chain the first user's ID into an environment variable for the next request\r",
+              "const jsonData = pm.response.json();\r",
+              "pm.environment.set(\"userId\", jsonData.data[0].id);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{apiKey}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "https://reqres.in/api/users?page=2",
+          "protocol": "https",
+          "host": [
+            "reqres",
+            "in"
+          ],
+          "path": [
+            "api",
+            "users"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "2"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET single user (chained userId)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Returned user has expected fields\", function () {\r",
+              "    const jsonData = pm.response.json();\r",
+              "    pm.expect(jsonData.data).to.have.property(\"email\");\r",
+              "    pm.expect(jsonData.data).to.have.property(\"first_name\");\r",
+              "    pm.expect(jsonData.data).to.have.property(\"id\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Returned user ID matches the chained userId variable\", function () {\r",
+              "    const jsonData = pm.response.json();\r",
+              "    const expectedId = pm.environment.get(\"userId\");\r",
+              "    pm.expect(String(jsonData.data.id)).to.eql(String(expectedId));\r",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{apiKey}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "https://reqres.in/api/users/{{userId}}",
+          "protocol": "https",
+          "host": [
+            "reqres",
+            "in"
+          ],
+          "path": [
+            "api",
+            "users",
+            "{{userId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST create user",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201\", function () {\r",
+              "    pm.response.to.have.status(201);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response has id\", function () {\r",
+              "    const jsonData = pm.response.json();\r",
+              "    pm.expect(jsonData).to.have.property(\"id\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response has createdAt field\", function () {\r",
+              "    const jsonData = pm.response.json();\r",
+              "    pm.expect(jsonData).to.have.property(\"createdAt\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"id is returned as a string on this endpoint\", function () {\r",
+              "    const jsonData = pm.response.json();\r",
+              "    pm.expect(jsonData.id).to.be.a(\"string\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Name exactly matches the sent request body\", function () {\r",
+              "    const jsonData = pm.response.json();\r",
+              "    pm.expect(jsonData.name).to.equal(\"Heidi\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Job exactly matches the sent request body\", function () {\r",
+              "    const jsonData = pm.response.json();\r",
+              "    pm.expect(jsonData.job).to.equal(\"QA Tester\");\r",
+              "});\r",
+              "\r",
+              "// Save the new user's ID for potential reuse in later requests\r",
+              "const jsonResponse = pm.response.json();\r",
+              "pm.environment.set(\"newUserId\", jsonResponse.id);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{apiKey}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"name\": \"Heidi\",\r\n    \"job\": \"QA Tester\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://reqres.in/api/users",
+          "protocol": "https",
+          "host": [
+            "reqres",
+            "in"
+          ],
+          "path": [
+            "api",
+            "users"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
