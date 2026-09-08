@@ -72,11 +72,8 @@ def js_click(driver, wait, locator):
 def fill_field(driver, wait, locator, text):
     field = wait.until(EC.element_to_be_clickable(locator))
     driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", field)
-    driver.execute_script("""
-        arguments[0].value = arguments[1];
-        arguments[0].dispatchEvent(new Event('input', { bubbles: true }));
-        arguments[0].dispatchEvent(new Event('change', { bubbles: true }));
-    """, field, text)
+    field.clear()
+    field.send_keys(text)
     wait.until(lambda d: field.get_attribute("value") == text)
 
 
