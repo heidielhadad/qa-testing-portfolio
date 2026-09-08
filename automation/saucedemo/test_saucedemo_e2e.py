@@ -63,6 +63,14 @@ def test_invalid_login(driver):
         'An error message saying "Username and password do not match any user in this service" should have appeared'
 
 
+def fill_field(driver, wait, locator, text):
+    field = wait.until(EC.element_to_be_clickable(locator))
+    driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", field)
+    field.clear()
+    field.send_keys(text)
+    wait.until(lambda d: field.get_attribute("value") == text)
+
+
 @pytest.mark.parametrize("target_item_name", [
     "Sauce Labs Backpack",
     "Sauce Labs Bike Light",
@@ -71,9 +79,9 @@ def test_invalid_login(driver):
 ])
 def test_add_to_cart_and_checkout(driver, target_item_name):
     wait = WebDriverWait(driver, 20)
-    wait.until(EC.presence_of_element_located((By.ID, "user-name"))).send_keys("standard_user")
-    wait.until(EC.presence_of_element_located((By.ID, "password"))).send_keys("secret_sauce")
-    js_click(driver, wait, (By.ID, "login-button"))
+    fill_field(driver, wait, (By.ID, "user-name"), "standard_user")
+    fill_field(driver, wait, (By.ID, "password"), "secret_sauce")
+    wait.until(EC.element_to_be_clickable((By.ID, "login-button"))).click()
 
     wait.until(EC.url_to_be("https://www.saucedemo.com/inventory.html"))
     assert driver.current_url == "https://www.saucedemo.com/inventory.html", \
@@ -90,9 +98,9 @@ def test_add_to_cart_and_checkout(driver, target_item_name):
 
     add_to_cart_button = target_item.find_element(By.CSS_SELECTOR, '[data-test^="add-to-cart"]')
     driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", add_to_cart_button)
-    driver.execute_script("arguments[0].click();", add_to_cart_button)
+    add_to_cart_button.click()
 
-    js_click(driver, wait, (By.CLASS_NAME, "shopping_cart_link"))
+    wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "shopping_cart_link"))).click()
     wait.until(EC.url_to_be("https://www.saucedemo.com/cart.html"))
     assert driver.current_url == "https://www.saucedemo.com/cart.html", \
         f"Landed on {driver.current_url}, although it was expected to land on cart.html"
@@ -101,21 +109,21 @@ def test_add_to_cart_and_checkout(driver, target_item_name):
     assert cart_item.text == target_item_name, \
         f"Expected to find {target_item_name} in the cart. Instead, found {cart_item.text}"
 
-    js_click(driver, wait, (By.ID, "checkout"))
+    wait.until(EC.element_to_be_clickable((By.ID, "checkout"))).click()
     wait.until(EC.url_to_be("https://www.saucedemo.com/checkout-step-one.html"))
     assert driver.current_url == "https://www.saucedemo.com/checkout-step-one.html", \
         f"Landed on {driver.current_url}, although it was expected to land on checkout-step-one.html"
 
-    wait.until(EC.presence_of_element_located((By.ID, "first-name"))).send_keys("First")
-    wait.until(EC.presence_of_element_located((By.ID, "last-name"))).send_keys("Last")
-    wait.until(EC.presence_of_element_located((By.ID, "postal-code"))).send_keys("12345")
-    js_click(driver, wait, (By.ID, "continue"))
+    fill_field(driver, wait, (By.ID, "first-name"), "First")
+    fill_field(driver, wait, (By.ID, "last-name"), "Last")
+    fill_field(driver, wait, (By.ID, "postal-code"), "12345")
+    wait.until(EC.element_to_be_clickable((By.ID, "continue"))).click()
 
     wait.until(EC.url_to_be("https://www.saucedemo.com/checkout-step-two.html"))
     assert driver.current_url == "https://www.saucedemo.com/checkout-step-two.html", \
         f"Landed on {driver.current_url}, although it was expected to land on checkout-step-two.html"
 
-    js_click(driver, wait, (By.ID, "finish"))
+    wait.until(EC.element_to_be_clickable((By.ID, "finish"))).click()
 
     confirmation_message = wait.until(
         EC.presence_of_element_located((By.CLASS_NAME, "complete-header"))
