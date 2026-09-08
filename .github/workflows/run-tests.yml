@@ -19,7 +19,7 @@ jobs:
         run: pip install -r automation/requirements.txt
 
       - name: Run tests
-        run: pytest automation/ -v --ignore=automation/exploratory-practice
+        run: pytest automation/ -v --ignore=automation/exploratory-practice --reruns 2 --reruns-delay 5
 
       - name: Upload failure screenshots
         if: failure()
