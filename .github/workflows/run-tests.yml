@@ -20,11 +20,11 @@ jobs:
 
       - name: Run tests
         run: pytest automation/ -v --ignore=automation/exploratory-practice
-        
+
       - name: Upload failure screenshots
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: failure-screenshots
-          path: automation/**/failure_*.png
-          if-no-files-found: ignore      
+          path: "**/failure_*.png"
+          if-no-files-found: ignore
