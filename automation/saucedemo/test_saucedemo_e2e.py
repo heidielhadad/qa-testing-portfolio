@@ -5,12 +5,18 @@ from webdriver_manager.chrome import ChromeDriverManager
 import pytest
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.options import Options
+import os
+
 
 # Setup the driver
 @pytest.fixture
 def driver():
     service = Service(ChromeDriverManager().install())
-    browser = webdriver.Chrome(service = service)
+    options = Options()
+    if os.environ.get("CI"):
+        options.add_argument("--headless=new")
+    browser = webdriver.Chrome(service = service, options = options)
 
     #Open the login page
     browser.get("https://www.saucedemo.com/")

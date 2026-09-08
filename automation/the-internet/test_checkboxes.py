@@ -3,13 +3,18 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 import pytest
+from selenium.webdriver.chrome.options import Options
+import os
 
 
 # Set up the driver
 @pytest.fixture
 def driver():
     service = Service(ChromeDriverManager().install())
-    browser = webdriver.Chrome(service=service)
+    options = Options()
+    if os.environ.get("CI"):
+        options.add_argument("--headless=new")
+    browser = webdriver.Chrome(service=service, options=options)
 
     # Open the URL
     browser.get("https://the-internet.herokuapp.com/checkboxes")
