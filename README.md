@@ -1,8 +1,8 @@
-![Tests](https://github.com/heidielhadad/qa-testing-portfolio/actions/workflows/run-tests.yml/badge.svg)
-
 # QA Testing Portfolio
 
-QA Engineer with hands-on experience in manual testing, API testing, and test automation. This repo covers the full testing lifecycle: test case design, bug reporting, API testing, and automated end-to-end test suites.
+![Tests](https://github.com/heidielhadad/qa-testing-portfolio/actions/workflows/run-tests.yml/badge.svg)
+
+QA Engineer with hands-on experience in manual testing, API testing, and test automation. This repo covers the full testing lifecycle: test case design, bug reporting, API testing, automated end-to-end test suites, and a CI pipeline.
 
 **Applications under test:** [Sauce Demo](https://www.saucedemo.com/) (sample e-commerce site) and [the-internet](https://the-internet.herokuapp.com/) (QA practice site).
 
@@ -28,6 +28,7 @@ Selenium + pytest automation suites.
 automation/
 ├── requirements.txt
 ├── saucedemo/
+│   ├── conftest.py
 │   └── test_saucedemo_e2e.py      # valid/invalid login + full checkout, parametrized across products
 ├── the-internet/
 │   └── test_checkboxes.py         # checkbox default state and toggle behaviour
@@ -35,18 +36,21 @@ automation/
     └── YT_search_and_play_full_video_automation.py
 ```
 
-Built with pytest fixtures for setup/teardown, explicit waits (`WebDriverWait` + expected conditions), and `@pytest.mark.parametrize` for data-driven tests.
+Built with pytest fixtures for setup/teardown, explicit waits (`WebDriverWait` + expected conditions), and `@pytest.mark.parametrize` for data-driven tests. The suite runs in headless Chrome under CI and in a visible browser locally (auto-detected via the `CI` environment variable).
 
 The `exploratory-practice/` script is a browser automation exercise rather than a test suite — it searches YouTube, plays the first result, and handles dynamically generated class names, pre-roll ad detection, and custom wait conditions.
 
 **To run the test suites:**
 ```
 pip install -r automation/requirements.txt
-pytest automation/ -v
+pytest automation/ -v --ignore=automation/exploratory-practice
 ```
 
+## CI/CD
+Tests run automatically on every push via GitHub Actions on a clean Ubuntu runner with headless Chrome. Achieving reliable headless runs required explicit waits, action-verification (confirming clicks and inputs actually registered before proceeding), and JS-based clicks to eliminate environment-specific flakiness. Failure screenshots are captured and uploaded as artifacts for debugging. See the [Actions tab](https://github.com/heidielhadad/qa-testing-portfolio/actions) for run history.
+
 ## Skills demonstrated
-Manual testing, test case design (EP/BVA), bug lifecycle management, Jira, API testing, Postman, Selenium WebDriver, pytest, Python
+Manual testing, test case design (EP/BVA), bug lifecycle management, Jira, API testing, Postman, Selenium WebDriver, pytest, CI/CD (GitHub Actions), Python
 
 ---
 [LinkedIn](https://www.linkedin.com/in/heidialhadad/)
