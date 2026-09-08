@@ -63,6 +63,12 @@ def test_invalid_login(driver):
         'An error message saying "Username and password do not match any user in this service" should have appeared'
 
 
+def js_click(driver, wait, locator):
+    element = wait.until(EC.element_to_be_clickable(locator))
+    driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
+    driver.execute_script("arguments[0].click();", element)
+
+
 def fill_field(driver, wait, locator, text):
     field = wait.until(EC.element_to_be_clickable(locator))
     driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", field)
@@ -79,14 +85,17 @@ def fill_field(driver, wait, locator, text):
 ])
 def test_add_to_cart_and_checkout(driver, target_item_name):
     wait = WebDriverWait(driver, 20)
+
+    # --- Login ---
     fill_field(driver, wait, (By.ID, "user-name"), "standard_user")
     fill_field(driver, wait, (By.ID, "password"), "secret_sauce")
-    wait.until(EC.element_to_be_clickable((By.ID, "login-button"))).click()
+    js_click(driver, wait, (By.ID, "login-button"))
 
     wait.until(EC.url_to_be("https://www.saucedemo.com/inventory.html"))
     assert driver.current_url == "https://www.saucedemo.com/inventory.html", \
         f"Expected to land on inventory page instead of {driver.current_url}"
 
+    # --- Find the target product ---
     items = wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "inventory_item")))
 
     target_item = None
@@ -95,12 +104,16 @@ def test_add_to_cart_and_checkout(driver, target_item_name):
         if item_name.text == target_item_name:
             target_item = item
             break
+    assert target_item is not None, f"Could not find product '{target_item_name}' on the inventory page"
 
+    # --- Add to cart, then verify the button flipped to Remove ---
     add_to_cart_button = target_item.find_element(By.CSS_SELECTOR, '[data-test^="add-to-cart"]')
     driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", add_to_cart_button)
-    add_to_cart_button.click()
+    driver.execute_script("arguments[0].click();", add_to_cart_button)
+    wait.until(lambda d: target_item.find_elements(By.CSS_SELECTOR, '[data-test^="remove"]'))
 
-    wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "shopping_cart_link"))).click()
+    # --- Go to cart ---
+    js_click(driver, wait, (By.CLASS_NAME, "shopping_cart_link"))
     wait.until(EC.url_to_be("https://www.saucedemo.com/cart.html"))
     assert driver.current_url == "https://www.saucedemo.com/cart.html", \
         f"Landed on {driver.current_url}, although it was expected to land on cart.html"
@@ -109,7 +122,8 @@ def test_add_to_cart_and_checkout(driver, target_item_name):
     assert cart_item.text == target_item_name, \
         f"Expected to find {target_item_name} in the cart. Instead, found {cart_item.text}"
 
-    wait.until(EC.element_to_be_clickable((By.ID, "checkout"))).click()
+    # --- Checkout: info page ---
+    js_click(driver, wait, (By.ID, "checkout"))
     wait.until(EC.url_to_be("https://www.saucedemo.com/checkout-step-one.html"))
     assert driver.current_url == "https://www.saucedemo.com/checkout-step-one.html", \
         f"Landed on {driver.current_url}, although it was expected to land on checkout-step-one.html"
@@ -117,14 +131,16 @@ def test_add_to_cart_and_checkout(driver, target_item_name):
     fill_field(driver, wait, (By.ID, "first-name"), "First")
     fill_field(driver, wait, (By.ID, "last-name"), "Last")
     fill_field(driver, wait, (By.ID, "postal-code"), "12345")
-    wait.until(EC.element_to_be_clickable((By.ID, "continue"))).click()
+    js_click(driver, wait, (By.ID, "continue"))
 
+    # --- Checkout: overview page ---
     wait.until(EC.url_to_be("https://www.saucedemo.com/checkout-step-two.html"))
     assert driver.current_url == "https://www.saucedemo.com/checkout-step-two.html", \
         f"Landed on {driver.current_url}, although it was expected to land on checkout-step-two.html"
 
-    wait.until(EC.element_to_be_clickable((By.ID, "finish"))).click()
+    js_click(driver, wait, (By.ID, "finish"))
 
+    # --- Confirmation ---
     confirmation_message = wait.until(
         EC.presence_of_element_located((By.CLASS_NAME, "complete-header"))
     )
