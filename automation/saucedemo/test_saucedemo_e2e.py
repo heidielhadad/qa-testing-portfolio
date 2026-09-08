@@ -56,7 +56,7 @@ def test_add_to_cart_and_checkout(driver, target_item_name):
     wait = WebDriverWait(driver, 10)
     wait.until(EC.presence_of_element_located((By.ID, "user-name"))).send_keys("standard_user")
     wait.until(EC.presence_of_element_located((By.ID, "password"))).send_keys("secret_sauce")
-    wait.until(EC.presence_of_element_located((By.ID, "login-button"))).click()
+    wait.until(EC.element_to_be_clickable((By.ID, "login-button"))).click()
 
     wait.until(EC.url_to_be("https://www.saucedemo.com/inventory.html"))
     assert driver.current_url == "https://www.saucedemo.com/inventory.html", \
@@ -71,9 +71,10 @@ def test_add_to_cart_and_checkout(driver, target_item_name):
             target_item = item
             break
 
-    target_item.find_element(By.CSS_SELECTOR, '[data-test^="add-to-cart"]').click()
+    add_to_cart_button = target_item.find_element(By.CSS_SELECTOR, '[data-test^="add-to-cart"]')
+    wait.until(EC.element_to_be_clickable(add_to_cart_button)).click()
 
-    driver.find_element(By.CLASS_NAME, "shopping_cart_link").click()
+    wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "shopping_cart_link"))).click()
     wait.until(EC.url_to_be("https://www.saucedemo.com/cart.html"))
     assert driver.current_url == "https://www.saucedemo.com/cart.html", \
         f"Landed on {driver.current_url}, although it was expected to land on cart.html"
@@ -82,7 +83,7 @@ def test_add_to_cart_and_checkout(driver, target_item_name):
     assert cart_item.text == target_item_name, \
         f"Expected to find {target_item_name} in the cart. Instead, found {cart_item.text}"
 
-    driver.find_element(By.ID, "checkout").click()
+    wait.until(EC.element_to_be_clickable((By.ID, "checkout"))).click()
     wait.until(EC.url_to_be("https://www.saucedemo.com/checkout-step-one.html"))
     assert driver.current_url == "https://www.saucedemo.com/checkout-step-one.html", \
         f"Landed on {driver.current_url}, although it was expected to land on checkout-step-one.html"
@@ -90,13 +91,13 @@ def test_add_to_cart_and_checkout(driver, target_item_name):
     wait.until(EC.presence_of_element_located((By.ID, "first-name"))).send_keys("First")
     wait.until(EC.presence_of_element_located((By.ID, "last-name"))).send_keys("Last")
     wait.until(EC.presence_of_element_located((By.ID, "postal-code"))).send_keys("12345")
-    wait.until(EC.presence_of_element_located((By.ID, "continue"))).click()
+    wait.until(EC.element_to_be_clickable((By.ID, "continue"))).click()
 
     wait.until(EC.url_to_be("https://www.saucedemo.com/checkout-step-two.html"))
     assert driver.current_url == "https://www.saucedemo.com/checkout-step-two.html", \
         f"Landed on {driver.current_url}, although it was expected to land on checkout-step-two.html"
 
-    wait.until(EC.presence_of_element_located((By.ID, "finish"))).click()
+    wait.until(EC.element_to_be_clickable((By.ID, "finish"))).click()
 
     confirmation_message = wait.until(
         EC.presence_of_element_located((By.CLASS_NAME, "complete-header"))
