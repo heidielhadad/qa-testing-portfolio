@@ -1,3 +1,5 @@
+![Tests](https://github.com/heidielhadad/qa-testing-portfolio/actions/workflows/run-tests.yml/badge.svg)
+
 # QA Testing Portfolio
 
 QA Engineer with hands-on experience in manual testing, API testing, and test automation. This repo covers the full testing lifecycle: test case design, bug reporting, API testing, and automated end-to-end test suites.
